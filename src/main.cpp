@@ -513,8 +513,8 @@ static void addMessages(const gp::Descriptor *descriptor,
     for (int i = 0; i < descriptor->field_count(); ++i) {
         addField(descriptor->field(i), &fields);
     }
-    message["message_has_fields"] = !fields.isEmpty();
     message["message_fields"] = fields;
+    message["message_has_fields"] = !fields.isEmpty();
 
     // Add nested extensions.
     QVariantList extensions;
@@ -577,11 +577,13 @@ static void addService(const gp::ServiceDescriptor *serviceDescriptor, QVariantL
         method["method_request_type"] = QString::fromStdString(methodDescriptor->input_type()->name());
         method["method_request_full_type"] = QString::fromStdString(methodDescriptor->input_type()->full_name());
         method["method_request_long_type"] = longName(methodDescriptor->input_type());
-        
+        method["method_request_streaming"] = QString::fromStdString(methodDescriptor->client_streaming() ? "stream " : "");
+
         // Add type for method output
         method["method_response_type"] = QString::fromStdString(methodDescriptor->output_type()->name());
         method["method_response_full_type"] = QString::fromStdString(methodDescriptor->output_type()->full_name());
         method["method_response_long_type"] = longName(methodDescriptor->output_type());
+        method["method_response_streaming"] = QString::fromStdString(methodDescriptor->server_streaming() ? "stream " : "");
         
         methods.append(method);
     }
@@ -624,6 +626,7 @@ static void addFile(const gp::FileDescriptor *fileDescriptor, QVariantList *file
     }
     std::sort(messages.begin(), messages.end(), &longNameLessThan);
     file["file_messages"] = messages;
+    file["file_has_messages"] = !messages.isEmpty();
 
     // Add enums.
     for (int i = 0; i < fileDescriptor->enum_type_count(); ++i) {
@@ -631,6 +634,7 @@ static void addFile(const gp::FileDescriptor *fileDescriptor, QVariantList *file
     }
     std::sort(enums.begin(), enums.end(), &longNameLessThan);
     file["file_enums"] = enums;
+    file["file_has_enums"] = !enums.isEmpty();
 
     // Add services.
     for (int i = 0; i < fileDescriptor->service_count(); ++i) {
